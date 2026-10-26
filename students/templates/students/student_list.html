@@ -1,0 +1,49 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Students</h2>
+    <a href="{% url 'add_student' %}" class="btn btn-success">Add Student</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-5"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by name or roll no"></div>
+    <div class="col-md-3">
+        <select name="class" class="form-select">
+            <option value="">All classes</option>
+            {% for c in classes %}<option value="{{ c }}" {% if c == selected_class %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-md-4"><button class="btn btn-primary">Filter</button> <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">Reset</a></div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover bg-white">
+    <thead class="table-dark">
+        <tr><th>Roll No</th><th>Name</th><th>Class</th><th>Section</th><th width="230">Action</th></tr>
+    </thead>
+    <tbody>
+        {% for student in page %}
+        <tr>
+            <td>{{ student.roll_no }}</td>
+            <td><a href="{% url 'student_detail' student.id %}">{{ student.name }}</a></td>
+            <td>{{ student.student_class }}</td>
+            <td>{{ student.section }}</td>
+            <td>
+                <a href="{% url 'student_detail' student.id %}" class="btn btn-info btn-sm">View</a>
+                <a href="{% url 'update_student' student.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <form method="post" action="{% url 'delete_student' student.id %}" class="d-inline"
+                      onsubmit="return confirm('Delete {{ student.name|escapejs }} and all their attendance?');">
+                    {% csrf_token %}
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center">No students found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% include 'students/pagination.html' %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<h2 class="mb-3">Attendance History</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Name or roll no"></div>
+    <div class="col-md-2">
+        <select name="status" class="form-select">
+            <option value="">Any status</option>
+            <option value="Present" {% if status == 'Present' %}selected{% endif %}>Present</option>
+            <option value="Absent" {% if status == 'Absent' %}selected{% endif %}>Absent</option>
+        </select>
+    </div>
+    <div class="col-md-2"><input type="date" name="from" value="{{ date_from }}" class="form-control" title="From"></div>
+    <div class="col-md-2"><input type="date" name="to" value="{{ date_to }}" class="form-control" title="To"></div>
+    <div class="col-md-3"><button class="btn btn-primary">Filter</button> <a href="{% url 'attendance_history' %}" class="btn btn-outline-secondary">Reset</a></div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover bg-white">
+    <thead class="table-dark"><tr><th>Date</th><th>Roll No</th><th>Student</th><th>Status</th></tr></thead>
+    <tbody>
+        {% for attendance in page %}
+        <tr>
+            <td>{{ attendance.date }}</td>
+            <td>{{ attendance.student.roll_no }}</td>
+            <td><a href="{% url 'student_detail' attendance.student.id %}">{{ attendance.student.name }}</a></td>
+            <td>
+                {% if attendance.status == "Present" %}
+                <span class="badge bg-success">Present</span>
+                {% else %}
+                <span class="badge bg-danger">Absent</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center">No attendance records found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% include 'students/pagination.html' %}
+{% endblock %}

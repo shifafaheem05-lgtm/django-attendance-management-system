@@ -1,0 +1,67 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Attendance Dashboard</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="card text-center p-3"><h3>{{ total_students }}</h3><p class="mb-0">Total Students</p></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center p-3"><h3 class="text-success">{{ present }}</h3><p class="mb-0">Present Today</p></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center p-3"><h3 class="text-danger">{{ absent }}</h3><p class="mb-0">Absent Today</p></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center p-3"><h3>{{ today_percentage }}%</h3><p class="mb-0">Today's Attendance</p></div></div>
+</div>
+
+{% if not_marked and total_students %}
+<div class="alert alert-warning">
+    {{ not_marked }} student{{ not_marked|pluralize }} not marked today.
+    <a href="{% url 'mark_attendance' %}" class="alert-link">Mark attendance now</a>
+</div>
+{% endif %}
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card p-3">
+            <h5>Last 7 recorded days</h5>
+            {% if chart_data %}
+            <canvas id="dailyChart" height="130"></canvas>
+            {% else %}
+            <p class="text-muted mb-0">No attendance recorded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card p-3">
+            <h5>Low attendance (&lt; {{ threshold }}%)
+                {% if low_count %}<span class="badge bg-danger">{{ low_count }}</span>{% endif %}</h5>
+            {% for r in low_students %}
+            <div class="d-flex justify-content-between border-bottom py-2">
+                <a href="{% url 'student_detail' r.student.id %}">{{ r.student.name }}</a>
+                <span class="text-danger fw-bold">{{ r.percentage }}%</span>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">Everyone is above the threshold.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if chart_data %}
+{{ chart_data|json_script:"chart-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+    const data = JSON.parse(document.getElementById("chart-data").textContent);
+    new Chart(document.getElementById("dailyChart"), {
+        type: "bar",
+        data: {
+            labels: data.map(d => d.date),
+            datasets: [
+                { label: "Present", data: data.map(d => d.present), backgroundColor: "#198754" },
+                { label: "Absent", data: data.map(d => d.absent), backgroundColor: "#dc3545" },
+            ],
+        },
+        options: { scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } } },
+    });
+</script>
+{% endif %}
+{% endblock %}

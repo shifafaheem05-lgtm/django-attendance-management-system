@@ -1,0 +1,52 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Attendance Report</h2>
+    <a class="btn btn-success" href="{% url 'export_report_csv' %}?{{ request.GET.urlencode }}">Download CSV</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Name or roll no"></div>
+    <div class="col-md-2">
+        <select name="class" class="form-select">
+            <option value="">All classes</option>
+            {% for c in classes %}<option value="{{ c }}" {% if c == selected_class %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2"><input type="date" name="from" value="{{ date_from }}" class="form-control" title="From"></div>
+    <div class="col-md-2"><input type="date" name="to" value="{{ date_to }}" class="form-control" title="To"></div>
+    <div class="col-md-3"><button class="btn btn-primary">Apply</button> <a href="{% url 'report' %}" class="btn btn-outline-secondary">Reset</a></div>
+</form>
+
+{% if low_count %}
+<div class="alert alert-danger">{{ low_count }} student{{ low_count|pluralize }} below {{ threshold }}% attendance.</div>
+{% endif %}
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover bg-white">
+    <thead class="table-dark">
+        <tr><th>Roll No</th><th>Student</th><th>Present</th><th>Absent</th><th>Total</th><th>Percentage</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+        {% for r in reports %}
+        <tr class="{% if r.low %}table-danger{% endif %}">
+            <td>{{ r.student.roll_no }}</td>
+            <td><a href="{% url 'student_detail' r.student.id %}">{{ r.student.name }}</a></td>
+            <td>{{ r.present }}</td>
+            <td>{{ r.absent }}</td>
+            <td>{{ r.total }}</td>
+            <td>
+                <div class="progress" style="height: 20px;">
+                    <div class="progress-bar {% if r.low %}bg-danger{% else %}bg-success{% endif %}" style="width: {{ r.percentage|stringformat:'.0f' }}%">{{ r.percentage }}%</div>
+                </div>
+            </td>
+            <td>{% if r.total == 0 %}<span class="text-muted">No data</span>{% elif r.low %}<span class="badge bg-danger">Low</span>{% else %}<span class="badge bg-success">OK</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center">No report available.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

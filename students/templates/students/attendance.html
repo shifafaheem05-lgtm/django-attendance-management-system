@@ -1,0 +1,57 @@
+{% extends 'students/base.html' %}
+
+{% block content %}
+<h2 class="mb-3">Mark Attendance</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3"><input type="date" name="date" value="{{ date|date:'Y-m-d' }}" class="form-control"></div>
+    <div class="col-md-3">
+        <select name="class" class="form-select">
+            <option value="">All classes</option>
+            {% for c in classes %}<option value="{{ c }}" {% if c == selected_class %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3"><button class="btn btn-outline-primary">Load</button></div>
+</form>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="date" value="{{ date|date:'Y-m-d' }}">
+    <p>Date: <strong>{{ date|date:"l, d M Y" }}</strong>
+        <button type="button" class="btn btn-sm btn-outline-success ms-2" onclick="setAll('Present')">All Present</button>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="setAll('Absent')">All Absent</button>
+    </p>
+
+    <div class="table-responsive">
+    <table class="table table-bordered bg-white">
+        <thead class="table-dark"><tr><th>Roll No</th><th>Name</th><th>Class</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row.student.roll_no }}</td>
+            <td>{{ row.student.name }}</td>
+            <td>{{ row.student.student_class }}-{{ row.student.section }}</td>
+            <td>
+                <select name="status_{{ row.student.id }}" class="form-select form-select-sm status-select">
+                    <option value="Present" {% if row.status == 'Present' %}selected{% endif %}>Present</option>
+                    <option value="Absent" {% if row.status == 'Absent' %}selected{% endif %}>Absent</option>
+                </select>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center">No students to mark.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Attendance</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function setAll(value) {
+        document.querySelectorAll(".status-select").forEach(s => s.value = value);
+    }
+</script>
+{% endblock %}
