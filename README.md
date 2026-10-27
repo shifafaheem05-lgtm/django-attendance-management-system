@@ -1,5 +1,9 @@
 # Django Attendance Management System
 
+**Live demo:** https://shifafaheem.pythonanywhere.com
+
+Demo login: `demo` / `Demo@2026` (fictional data only)
+
 A web-based student attendance system built with **Python and Django**. Teachers log in to manage students, mark daily attendance, review history, and generate attendance reports with percentage tracking, low-attendance warnings and CSV export.
 
 ## Key Features
