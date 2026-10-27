@@ -23,6 +23,12 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("1", "true", "yes")
 
 ALLOWED_HOSTS = [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
 
+# Needed when the site is served over HTTPS on a hosting platform, e.g.
+# DJANGO_CSRF_TRUSTED_ORIGINS=https://yourname.pythonanywhere.com
+CSRF_TRUSTED_ORIGINS = [
+    o for o in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o
+]
+
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
@@ -88,6 +94,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"  # target of `collectstatic` in production
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
